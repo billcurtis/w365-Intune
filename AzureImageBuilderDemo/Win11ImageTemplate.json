@@ -1,0 +1,79 @@
+{
+  "type": "Microsoft.VirtualMachineImages/imageTemplates",
+  "apiVersion": "2022-02-14",
+  "location": "EastUS",
+  "dependsOn": [],
+  "tags": {
+    "imagebuilderTemplate": "win11-25h2-ent",
+    "userIdentity": "enabled"
+  },
+  "identity": {
+    "type": "UserAssigned",
+    "userAssignedIdentities": {
+      "/subscriptions/f1a77dc4-b955-4493-bb61-64b356fd32ae/resourcegroups/ImageBuilder-rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/aibBuiUserId1768336192": {}
+    }
+  },
+  "properties": {
+    "buildTimeoutInMinutes": 100,
+    "vmProfile": {
+      "vmSize": "Standard_D2s_v3",
+      "osDiskSizeGB": 127
+    },
+    "source": {
+      "type": "PlatformImage",
+      "publisher": "MicrosoftWindowsDesktop",
+      "offer": "Windows-11",
+      "sku": "win11-25h2-ent",
+      "version": "latest"
+    },
+    "customize": [
+      {
+        "type": "PowerShell",
+        "name": "CreateBuildPath",
+        "runElevated": false,
+        "scriptUri": "https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/testPsScript.ps1"
+      },
+      {
+        "type": "WindowsRestart",
+        "restartCheckCommand": "echo Azure-Image-Builder-Restarted-the-VM  > c:\\buildArtifacts\\azureImageBuilderRestart.txt",
+        "restartTimeout": "5m"
+      },
+      {
+        "type": "File",
+        "name": "downloadBuildArtifacts",
+        "sourceUri": "https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/quickquickstarts/exampleArtifacts/buildArtifacts/index.html",
+        "destination": "c:\\buildArtifacts\\index.html"
+      },
+      {
+        "type": "PowerShell",
+        "name": "settingUpMgmtAgtPath",
+        "runElevated": false,
+        "inline": [
+          "mkdir c:\\buildActions",
+          "echo Azure-Image-Builder-Was-Here  > c:\\buildActions\\buildActionsOutput.txt"
+        ]
+      },
+      {
+        "type": "WindowsUpdate",
+        "searchCriteria": "IsInstalled=0",
+        "filters": [
+          "exclude:$_.Title -like '*Preview*'",
+          "include:$true"
+        ],
+        "updateLimit": 20
+      }
+    ],
+    "distribute": [
+      {
+        "type": "ManagedImage",
+        "imageId": "/subscriptions/f1a77dc4-b955-4493-bb61-64b356fd32ae/resourceGroups/ImageBuilder-rg/providers/Microsoft.Compute/images/win11AIBImage",
+        "location": "EastUS",
+        "runOutputName": "win119AIBImageOutput",
+        "artifactTags": {
+          "source": "azVmImageBuilder",
+          "baseosimg": "windows1125h2-ent"
+        }
+      }
+    ]
+  }
+}
