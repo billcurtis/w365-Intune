@@ -31,7 +31,7 @@
         "type": "PowerShell",
         "name": "CreateBuildPath",
         "runElevated": false,
-        "scriptUri": "https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/testPsScript.ps1"
+        "scriptUri": "https://raw.githubusercontent.com/billcurtis/w365-Intune/refs/heads/main/AzureImageBuilderDemo/Artifacts/InstallPrograms.ps1"
       },
       {
         "type": "WindowsRestart",
